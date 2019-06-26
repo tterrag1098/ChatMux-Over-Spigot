@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        maven {
+            name 'Shadow'
+            url 'http://dl.bintray.com/content/johnrengelman/gradle-plugins'
+        }
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'org.ajoberstar:gradle-git:0.8.0'
+    }
+}
+
+plugins {
+  id 'com.github.johnrengelman.shadow' version '4.0.4'
+}
+
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+archivesBaseName = "K9"
+group = 'com.tterrag.chatmux.spigot'
+description = "ChatMux Wrapper for SpigotMC"
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+import org.ajoberstar.grgit.Grgit
+def repo = Grgit.open(project.file('.'))
+
+if (System.getenv('BUILD_NUMBER') != null) {
+    version += ".${System.getenv('BUILD_NUMBER')}"
+} else {
+    version += ".${repo.log().find().abbreviatedId}"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+shadowJar {
+	configurations = [project.configurations.runtimeClasspath] 
+	mergeServiceFiles()
+	dependencies {
+		exclude "*.html"
+		exclude dependency('org.projectlombok:lombok')
+	}
+}
+
+repositories {
+    mavenCentral()
+	maven {
+		url "https://hub.spigotmc.org/nexus/"
+	}
+}
+
+dependencies {
+    implementation 'org.spigotmc:spigot-api:1.14.3-R0.0-SNAPSHOT'
+    implementation fileTree(dir: 'libs', include:'*.jar')
+    
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}
