@@ -5,15 +5,14 @@ buildscript {
             url 'http://dl.bintray.com/content/johnrengelman/gradle-plugins'
         }
         mavenCentral()
-        mavenLocal()
-    }
-    dependencies {
-        classpath 'org.ajoberstar:gradle-git:0.8.0'
+        jcenter()
     }
 }
 
 plugins {
+  id 'org.ajoberstar.grgit' version '3.1.1'
   id 'com.github.johnrengelman.shadow' version '4.0.4'
+  id 'ru.endlesscode.bukkitgradle' version '0.8.2'
 }
 
 apply plugin: 'maven'
@@ -21,14 +20,13 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
-archivesBaseName = "K9"
 group = 'com.tterrag.chatmux.spigot'
 description = "ChatMux Wrapper for SpigotMC"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 import org.ajoberstar.grgit.Grgit
-def repo = Grgit.open(project.file('.'))
+def repo = Grgit.open()
 
 if (System.getenv('BUILD_NUMBER') != null) {
     version += ".${System.getenv('BUILD_NUMBER')}"
@@ -40,26 +38,43 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+bukkit {
+    version = '1.14.3'
+ 
+    meta {
+        name = 'ChatMux-Over-Spigot'
+        main = 'com.tterrag.chatmux.spigot.ChatMuxPlugin'
+        authors = ['tterrag']
+    }
+}
+
 shadowJar {
 	configurations = [project.configurations.runtimeClasspath] 
 	mergeServiceFiles()
 	dependencies {
 		exclude "*.html"
 		exclude dependency('org.projectlombok:lombok')
+		exclude dependency('com.google.code.findbugs:jsr305')
 	}
 }
 
 repositories {
     mavenCentral()
+	maven { 
+		url = 'https://oss.sonatype.org/content/repositories/snapshots'
+	}
 	maven {
-		url "https://hub.spigotmc.org/nexus/"
+		url = 'https://maven2.tterrag.com/'
 	}
 }
 
 dependencies {
-    implementation 'org.spigotmc:spigot-api:1.14.3-R0.0-SNAPSHOT'
+    compileOnly spigotApi()
+	implementation 'com.tterrag.chatmux:ChatMux-core:0.0.1.12'
     implementation fileTree(dir: 'libs', include:'*.jar')
     
     compileOnly 'org.projectlombok:lombok:1.18.8'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    
+    annotationProcessor 'org.pf4j:pf4j:2.6.0'
 }
