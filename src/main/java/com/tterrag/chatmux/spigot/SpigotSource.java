@@ -29,6 +29,7 @@ public class SpigotSource implements ChatSource {
     @Override
     public Flux<? extends ChatMessage> connect(String channel) {
         return Flux.<SpigotMessage> create(sink -> {
+            sink.next(new SpigotMessage("Server Online!", false));
             ChatMuxPlugin.instance.getServer().getPluginManager().registerEvents(listener = new Listener() {
 
                 @EventHandler
