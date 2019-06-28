@@ -13,37 +13,36 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class SpigotSource implements ChatSource<TextComponent, String> {
-	
-	private Listener listener;
 
-	@Override
-	public ChatService<TextComponent, String> getType() {
-		return SpigotService.getInstance();
-	}
+    private Listener listener;
 
-	@Override
-	public Flux<? extends ChatMessage> connect(String channel) {
-		return Flux.<SpigotMessage>create(sink -> {
-			ChatMuxPlugin.instance.getServer().getPluginManager().registerEvents(listener = new Listener() {
-				
-				@EventHandler
-				public void onChat(AsyncPlayerChatEvent event) {
-					sink.next(new SpigotMessage(event.getMessage(), event.getPlayer()));
-				}
-			}, ChatMuxPlugin.instance);
-		}).doOnCancel(() -> {
-			AsyncPlayerChatEvent.getHandlerList().unregister(listener);
-			listener = null;
-		});
-	}
+    @Override
+    public ChatService<TextComponent, String> getType() {
+        return SpigotService.getInstance();
+    }
 
-	@Override
-	public Mono<Void> send(String channel, ChatMessage payload, boolean raw) {
-		return Mono.fromRunnable(() -> 
-				ChatMuxPlugin.instance.getServer().broadcastMessage(payload.toString()));
-	}
+    @Override
+    public Flux<? extends ChatMessage> connect(String channel) {
+        return Flux.<SpigotMessage> create(sink -> {
+            ChatMuxPlugin.instance.getServer().getPluginManager().registerEvents(listener = new Listener() {
 
-	@Override
-	public void disconnect(String channel) {}
+                @EventHandler
+                public void onChat(AsyncPlayerChatEvent event) {
+                    sink.next(new SpigotMessage(event.getMessage(), event.getPlayer()));
+                }
+            }, ChatMuxPlugin.instance);
+        }).doOnCancel(() -> {
+            AsyncPlayerChatEvent.getHandlerList().unregister(listener);
+            listener = null;
+        });
+    }
+
+    @Override
+    public Mono<Void> send(String channel, ChatMessage payload, boolean raw) {
+        return Mono.fromRunnable(() -> ChatMuxPlugin.instance.getServer().broadcastMessage(payload.toString()));
+    }
+
+    @Override
+    public void disconnect(String channel) {}
 
 }

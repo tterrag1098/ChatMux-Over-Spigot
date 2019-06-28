@@ -11,28 +11,28 @@ import net.md_5.bungee.api.chat.TextComponent;
 @Extension
 public class SpigotService extends ChatService<TextComponent, String> {
 
-	public SpigotService() {
-		super("spigot");
+    public SpigotService() {
+        super("spigot");
         instance = this;
     }
-    
+
     private static SpigotService instance;
 
     public static SpigotService getInstance() {
-    	SpigotService inst = instance;
+        SpigotService inst = instance;
         if (inst == null) {
             throw new IllegalStateException("Discord service not initialized");
         }
         return inst;
     }
-    
-	@Override
-	protected ChatSource<TextComponent, String> createSource() {
-		return new SpigotSource();
-	}
 
-	@Override
-	public ServiceConfig<?> getConfig() {
-		return null;
-	}
+    @Override
+    protected ChatSource<TextComponent, String> createSource() {
+        return new SpigotSource();
+    }
+
+    @Override
+    public ServiceConfig<?> getConfig() {
+        return null;
+    }
 }

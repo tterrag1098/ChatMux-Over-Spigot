@@ -5,8 +5,8 @@ import org.pf4j.PluginWrapper;
 
 public class SpigotPlugin extends Plugin {
 
-	public SpigotPlugin(PluginWrapper wrapper) {
-		super(wrapper);
-	}
+    public SpigotPlugin(PluginWrapper wrapper) {
+        super(wrapper);
+    }
 
 }
