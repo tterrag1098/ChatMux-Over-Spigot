@@ -3,11 +3,16 @@ package com.tterrag.chatmux.spigot;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 
 import com.tterrag.chatmux.bridge.ChatMessage;
 import com.tterrag.chatmux.bridge.ChatService;
 import com.tterrag.chatmux.bridge.ChatSource;
 
+import emoji4j.EmojiUtils;
 import net.md_5.bungee.api.chat.TextComponent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +33,27 @@ public class SpigotSource implements ChatSource<TextComponent, String> {
 
                 @EventHandler
                 public void onChat(AsyncPlayerChatEvent event) {
-                    sink.next(new SpigotMessage(event.getMessage(), event.getPlayer()));
+                    sink.next(new SpigotMessage(event.getMessage(), event.getPlayer(), false));
+                }
+                
+                @EventHandler
+                public void onJoin(PlayerJoinEvent event) {
+                    sink.next(new SpigotMessage("joined the game", event.getPlayer(), true));
+                }
+                
+                @EventHandler
+                public void onLeave(PlayerQuitEvent event) {
+                    sink.next(new SpigotMessage("left the game", event.getPlayer(), true));
+                }
+                
+                @EventHandler
+                public void onServerCommand(ServerCommandEvent event) {
+                    sink.next(new SpigotMessage("sent command: " + event.getCommand(), "[Server]", true));
+                }
+                
+                @EventHandler
+                public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+                    sink.next(new SpigotMessage("sent command: " + event.getMessage().substring(1), event.getPlayer(), true));
                 }
             }, ChatMuxPlugin.instance);
         }).doOnCancel(() -> {
@@ -39,7 +64,7 @@ public class SpigotSource implements ChatSource<TextComponent, String> {
 
     @Override
     public Mono<Void> send(String channel, ChatMessage payload, boolean raw) {
-        return Mono.fromRunnable(() -> ChatMuxPlugin.instance.getServer().broadcastMessage(payload.toString()));
+        return Mono.fromRunnable(() -> ChatMuxPlugin.instance.getServer().broadcastMessage(EmojiUtils.shortCodify(payload.toString())));
     }
 
     @Override
