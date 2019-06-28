@@ -13,16 +13,15 @@ import com.tterrag.chatmux.bridge.ChatService;
 import com.tterrag.chatmux.bridge.ChatSource;
 
 import emoji4j.EmojiUtils;
-import net.md_5.bungee.api.chat.TextComponent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class SpigotSource implements ChatSource<TextComponent, String> {
+public class SpigotSource implements ChatSource {
 
     private Listener listener;
 
     @Override
-    public ChatService<TextComponent, String> getType() {
+    public ChatService getType() {
         return SpigotService.getInstance();
     }
 
@@ -48,12 +47,16 @@ public class SpigotSource implements ChatSource<TextComponent, String> {
                 
                 @EventHandler
                 public void onServerCommand(ServerCommandEvent event) {
-                    sink.next(new SpigotMessage("sent command: " + event.getCommand(), "[Server]", true));
+                    if (SpigotService.getInstance().getData().sendCommands()) {
+                        sink.next(new SpigotMessage("sent command: " + event.getCommand(), "[Server]", true));
+                    }
                 }
                 
                 @EventHandler
                 public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
-                    sink.next(new SpigotMessage("sent command: " + event.getMessage().substring(1), event.getPlayer(), true));
+                    if (SpigotService.getInstance().getData().sendCommands()) {
+                        sink.next(new SpigotMessage("sent command: " + event.getMessage().substring(1), event.getPlayer(), true));
+                    }
                 }
             }, ChatMuxPlugin.instance);
         }).doOnCancel(() -> {

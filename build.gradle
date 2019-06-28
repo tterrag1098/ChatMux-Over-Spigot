@@ -70,7 +70,7 @@ repositories {
 
 dependencies {
     compileOnly spigotApi()
-	implementation 'com.tterrag.chatmux:ChatMux-core:0.0.1.12'
+	implementation 'com.tterrag.chatmux:ChatMux-core:0.0.1.13'
 	implementation 'com.kcthota:emoji4j:5.0'
     implementation fileTree(dir: 'libs', include:'*.jar')
     
@@ -78,4 +78,5 @@ dependencies {
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     
     annotationProcessor 'org.pf4j:pf4j:2.6.0'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }
