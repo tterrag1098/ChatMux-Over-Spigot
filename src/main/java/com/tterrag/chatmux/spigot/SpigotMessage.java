@@ -28,7 +28,7 @@ public class SpigotMessage extends ChatMessage {
     public String getContent() {
         String ret = super.getContent();
         if (action) {
-            ret = "*" + ret + "*";
+            ret = "*" + ret.trim() + "*";
         }
         return ret;
     }
