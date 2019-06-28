@@ -2,6 +2,7 @@ package com.tterrag.chatmux.spigot;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -46,9 +47,20 @@ public class SpigotSource implements ChatSource {
                 }
                 
                 @EventHandler
+                public void onDeath(PlayerDeathEvent event) {
+                    String msg = event.getDeathMessage();
+                    if (msg.startsWith(event.getEntity().getName())) {
+                        msg = msg.replace(event.getEntity().getName(), "");
+                    }
+                    sink.next(new SpigotMessage(msg, event.getEntity(), true));
+                }
+                
+                @EventHandler
                 public void onServerCommand(ServerCommandEvent event) {
                     if (SpigotService.getInstance().getData().sendCommands()) {
-                        sink.next(new SpigotMessage("sent command: " + event.getCommand(), "[Server]", true));
+                        sink.next(new SpigotMessage("sent command: " + event.getCommand(), true));
+                    } else if (event.getCommand().startsWith("say ")) {
+                        sink.next(new SpigotMessage(event.getCommand().substring(4), false));
                     }
                 }
                 

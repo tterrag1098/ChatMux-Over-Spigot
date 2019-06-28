@@ -13,13 +13,13 @@ public class SpigotMessage extends ChatMessage {
     private final boolean action;
 
     public SpigotMessage(String content, Player player, boolean action) {
-        super(SpigotService.getInstance(), "Minecraft", player.getName(), content, null);
+        super(SpigotService.getInstance(), "Minecraft", player.getName(), content, "https://mc-heads.net/avatar/" + player.getUniqueId());
         this.player = player;
         this.action = action;
     }
     
-    public SpigotMessage(String content, String username, boolean action) {
-        super(SpigotService.getInstance(), "Minecraft", username, content, null);
+    public SpigotMessage(String content, boolean action) {
+        super(SpigotService.getInstance(), "Minecraft", "[Server]", content, SpigotService.getInstance().getData().getServerAvatar());
         this.player = null;
         this.action = action;
     }
@@ -40,7 +40,9 @@ public class SpigotMessage extends ChatMessage {
 
     @Override
     public Mono<Void> kick() {
-        return Mono.justOrEmpty(player).doOnNext(p -> p.kickPlayer("Kicked by ChatMux moderator.")).then();
+        return Mono.justOrEmpty(player)
+                   .doOnNext(p -> p.kickPlayer("Kicked by ChatMux moderator."))
+                   .then();
     }
 
     @Override

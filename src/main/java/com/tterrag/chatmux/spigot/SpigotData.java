@@ -17,4 +17,7 @@ public class SpigotData implements ServiceData {
     @Accessors(fluent = true)
     private boolean sendCommands = false;
     
+    @Path("server_avatar")
+    private String serverAvatar = null;
+    
 }
