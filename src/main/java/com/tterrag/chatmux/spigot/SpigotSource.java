@@ -13,6 +13,8 @@ import com.tterrag.chatmux.bridge.ChatMessage;
 import com.tterrag.chatmux.bridge.ChatService;
 import com.tterrag.chatmux.bridge.ChatSource;
 
+import emoji4j.Emoji;
+import emoji4j.EmojiManager;
 import emoji4j.EmojiUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -80,7 +82,32 @@ public class SpigotSource implements ChatSource {
 
     @Override
     public Mono<Void> send(String channel, ChatMessage payload, boolean raw) {
-        return Mono.fromRunnable(() -> ChatMuxPlugin.instance.getServer().broadcastMessage(EmojiUtils.shortCodify(payload.toString())));
+        return Mono.fromRunnable(() -> 
+                ChatMuxPlugin.instance.getServer().broadcastMessage(
+                        cleanupEmojis(formatMinecraft(payload))));
+    }
+    
+    private static final String FORMAT_CODE = "\u00A7";
+    private static final String GRAY = FORMAT_CODE + '7';
+    private static final String RESET = FORMAT_CODE + 'r';
+    
+    private static String formatMinecraft(ChatMessage payload) {
+        return GRAY + "[" + payload.getSource().getName() + "/" + payload.getChannel() + "] " + RESET + "<" + payload.getUser() + "> " + payload.getContent();
+    }
+
+    private static String cleanupEmojis(String text) {
+        String emojifiedText = EmojiUtils.emojify(text);
+        for (Emoji emoji : EmojiManager.data()) {
+            StringBuilder shortCodeBuilder = new StringBuilder();
+            if (emoji.getEmoticons() != null && emoji.getEmoticons().size() > 0) {
+                shortCodeBuilder.append(emoji.getEmoticons().get(0));
+            } else {
+                shortCodeBuilder.append(":").append(emoji.getAliases().get(0)).append(":");
+            }
+
+            emojifiedText = emojifiedText.replace(emoji.getEmoji(), shortCodeBuilder.toString());
+        }
+        return emojifiedText;
     }
 
     @Override
