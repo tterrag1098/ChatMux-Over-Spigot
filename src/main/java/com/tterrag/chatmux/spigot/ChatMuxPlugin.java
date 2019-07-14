@@ -18,7 +18,10 @@ public class ChatMuxPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         try {
-            bot = Main.start(null).subscribe();
+            bot = Main.start(null)
+                    .doOnError(Throwable::printStackTrace)
+                    .doOnError(t -> getServer().broadcastMessage("ChatMuxOverSpigot failed: " + t.toString() + " | Please check the log for more details."))
+                    .subscribe();
         } catch (ExceptionInInitializerError e) {
             getServer().broadcastMessage("ChatMux-Over-Spigot does not support /reload!");
         }
